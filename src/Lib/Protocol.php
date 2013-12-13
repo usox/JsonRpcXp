@@ -22,7 +22,7 @@ class Protocol {
 	}
 
 	/**
-	 * Validates json-rpc message id
+	 * Validate json-rpc message id
 	 *
 	 * @param int|float|string $id
 	 *
@@ -33,7 +33,7 @@ class Protocol {
 	}
 
 	/**
-	 * Validates params
+	 * Validate params
 	 *
 	 * @param mixed $params
 	 *
@@ -54,6 +54,8 @@ class Protocol {
 	}
 
 	/**
+	 * Validate method name
+	 *
 	 * @param $method
 	 *
 	 * @return bool

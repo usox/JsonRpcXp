@@ -5,6 +5,9 @@ namespace Lx\JsonRpcXp\Lib;
 
 class ToolsTest extends \PHPUnit_Framework_TestCase {
 
+	/**
+	 * @var \Lx\JsonRpcXp\Lib\Tools
+	 */
 	private $object;
 
 	public function setUp() {
