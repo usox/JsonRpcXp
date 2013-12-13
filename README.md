@@ -4,4 +4,4 @@
 
 ----
 
-[![Build Status](https://travis-ci.org/l-x/Fna.png?branch=master)](https://travis-ci.org/l-x/Fna)
+[![Build Status](https://travis-ci.org/l-x/JsonRpcXp.png?branch=master)](https://travis-ci.org/l-x/JsonRpcXp)
