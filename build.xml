@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="JsonRpcXp" default="phpdoc">
+<project name="JsonRpcXp" default="tests">
 
     <property name="test_dir" value="./tests/" />
     <property name="src_dir" value="./src/" />
