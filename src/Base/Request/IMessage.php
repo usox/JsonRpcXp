@@ -44,82 +44,16 @@
 
 namespace Lx\JsonRpcXp\Base\Request;
 
-use Lx\JsonRpcXp;
 use Lx\JsonRpcXp\Lib\Protocol;
 
 /**
- * Class Message
+ * Interface IMessage
  *
- * Base class for request messages
+ * Interface for json-rpc request messages
  *
  * @package Lx\JsonRpcXp\Base\Request
  */
-class Message implements IMessage{
-
-	/**
-	 * Protocol version to use for validation
-	 *
-	 * @var Protocol
-	 */
-	protected $protocol;
-
-	/**
-	 * json-rpc version string
-	 *
-	 * @var string
-	 */
-	protected $jsonrpc;
-
-	/**
-	 * Message id
-	 *
-	 * @var string|int|float
-	 */
-	protected $id;
-
-	/**
-	 * Method to be called
-	 *
-	 * @var string
-	 */
-	protected $method;
-
-	/**
-	 * Parameters for the method call
-	 *
-	 * @var array
-	 */
-	protected $params;
-
-
-	/**
-	 * Constructor for Message instances. Sets protocol to a new instance of \Lx\JsonRpcXp\Lib\Protocol
-	 */
-	public function __construct() {
-		$this->setProtocol(new Protocol());
-	}
-
-	/**
-	 * Sets the protocol instance to use
-	 *
-	 * @param Protocol $protocol
-	 *
-	 * @return $this
-	 */
-	public function setProtocol(Protocol $protocol) {
-		$this->protocol = $protocol;
-
-		return $this;
-	}
-
-	/**
-	 * Returns the protocol instance to use
-	 *
-	 * @return Protocol
-	 */
-	public function getProtocol() {
-		return $this->protocol;
-	}
+interface IMessage {
 
 	/**
 	 * Sets the message id
@@ -128,23 +62,14 @@ class Message implements IMessage{
 	 *
 	 * @return $this
 	 */
-	public function setId($id) {
-		if (!$this->getProtocol()->validateId($id)) {
-			throw new \InvalidArgumentException('Invalid id');
-		}
-		$this->id = $id;
-
-		return $this;
-	}
+	public function setId($id);
 
 	/**
 	 * Returns the message id
 	 *
 	 * @return int|float|string
 	 */
-	public function getId() {
-		return $this->id;
-	}
+	public function getId();
 
 	/**
 	 * Sets the json-rpc version string
@@ -153,23 +78,14 @@ class Message implements IMessage{
 	 *
 	 * @return $this
 	 */
-	public function setJsonrpc($jsonrpc) {
-		if (!$this->getProtocol()->validateJsonRpcVersion($jsonrpc)) {
-			throw new \InvalidArgumentException('Invalid json-rpc version');
-		}
-		$this->jsonrpc = $jsonrpc;
-
-		return $this;
-	}
+	public function setJsonrpc($jsonrpc);
 
 	/**
 	 * Returns the json-rpc version string
 	 *
 	 * @return string
 	 */
-	public function getJsonrpc() {
-		return $this->jsonrpc;
-	}
+	public function getJsonrpc();
 
 	/**
 	 * Sets the method name
@@ -178,23 +94,14 @@ class Message implements IMessage{
 	 *
 	 * @return $this
 	 */
-	public function setMethod($method) {
-		if (!$this->getProtocol()->validateMethod($method)) {
-			throw new \InvalidArgumentException('Invalid method name');
-		}
-		$this->method = $method;
-
-		return $this;
-	}
+	public function setMethod($method);
 
 	/**
 	 * Returns the method name
 	 *
 	 * @return string
 	 */
-	public function getMethod() {
-		return $this->method;
-	}
+	public function getMethod();
 
 	/**
 	 * Sets the parameters
@@ -203,22 +110,29 @@ class Message implements IMessage{
 	 *
 	 * @return $this
 	 */
-	public function setParams(array $params) {
-		if (!$this->getProtocol()->validateParams($params)) {
-			throw new \InvalidArgumentException('Invalid parameter format');
-		}
-		$this->params = $params;
-
-		return $this;
-	}
+	public function setParams(array $params);
 
 	/**
 	 * Returns the parameters
 	 *
 	 * @return array
 	 */
-	public function getParams() {
-		return $this->params;
-	}
+	public function getParams();
+
+	/**
+	 * Sets the protocol instance to use
+	 *
+	 * @param Protocol $protocol
+	 *
+	 * @return $this
+	 */
+	public function setProtocol(Protocol $protocol);
+
+	/**
+	 * Returns the protocol instance to use
+	 *
+	 * @return Protocol
+	 */
+	public function getProtocol();
 
 } 
