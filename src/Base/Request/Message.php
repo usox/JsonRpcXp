@@ -56,30 +56,45 @@ use Lx\JsonRpcXp\Lib\Protocol;
  */
 class Message {
 
-	/** @var Protocol */
+	/**
+	 * Protocol version to use for validation
+	 *
+	 * @var Protocol
+	 */
 	protected $protocol;
 
 	/**
+	 * json-rpc version string
+	 *
 	 * @var string
 	 */
 	protected $jsonrpc;
 
 	/**
+	 * Message id
+	 *
 	 * @var string|int|float
 	 */
 	protected $id;
 
 	/**
+	 * Method to be called
+	 *
 	 * @var string
 	 */
 	protected $method;
 
 	/**
+	 * Parameters for the method call
+	 *
 	 * @var array
 	 */
 	protected $params;
 
 
+	/**
+	 * Constructor for Message instances. Sets protocol to a new instance of \Lx\JsonRpcXp\Lib\Protocol
+	 */
 	public function __construct() {
 		$this->setProtocol(new Protocol());
 	}
@@ -107,9 +122,11 @@ class Message {
 	}
 
 	/**
+	 * Sets the message id
+	 *
 	 * @param int|float|string $id
 	 *
-	 * @return $this;
+	 * @return $this
 	 */
 	public function setId($id) {
 		if (!$this->getProtocol()->validateId($id)) {
@@ -121,6 +138,8 @@ class Message {
 	}
 
 	/**
+	 * Returns the message id
+	 *
 	 * @return int|float|string
 	 */
 	public function getId() {
@@ -128,6 +147,8 @@ class Message {
 	}
 
 	/**
+	 * Sets the json-rpc version string
+	 *
 	 * @param string $jsonrpc
 	 *
 	 * @return $this
@@ -142,6 +163,8 @@ class Message {
 	}
 
 	/**
+	 * Returns the json-rpc version string
+	 *
 	 * @return string
 	 */
 	public function getJsonrpc() {
@@ -149,9 +172,11 @@ class Message {
 	}
 
 	/**
+	 * Sets the method name
+	 *
 	 * @param string $method
 	 *
-	 * @return $this;
+	 * @return $this
 	 */
 	public function setMethod($method) {
 		if (!$this->getProtocol()->validateMethod($method)) {
@@ -163,6 +188,8 @@ class Message {
 	}
 
 	/**
+	 * Returns the method name
+	 *
 	 * @return string
 	 */
 	public function getMethod() {
@@ -170,6 +197,8 @@ class Message {
 	}
 
 	/**
+	 * Sets the parameters
+	 *
 	 * @param array $params
 	 *
 	 * @return $this
@@ -184,6 +213,8 @@ class Message {
 	}
 
 	/**
+	 * Returns the parameters
+	 *
 	 * @return array
 	 */
 	public function getParams() {
