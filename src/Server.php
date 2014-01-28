@@ -187,9 +187,9 @@ class Server {
 	/**
 	 * Registers a callback as server callback within the given namespace
 	 *
-	 * @param string $name
-	 * @param callable $callback
-	 * @param string $namespace
+	 * @param string $name The name under which the callback will be accessible via json-rpc
+	 * @param callable $callback The callback wich will be exposed to json-rpc API
+	 * @param string $namespace The namespace under which the callback will be mounted
 	 *
 	 * @return Server
 	 */
@@ -296,7 +296,9 @@ class Server {
 		}
 
 		if (!$data = $this->json_decode($request)) {
-			return $this->fault(new Fault\ParseError());
+			return $this->json_encode(
+			            $this->fault(new Fault\ParseError())
+			);
 		}
 
 		if (is_array($data)) {
