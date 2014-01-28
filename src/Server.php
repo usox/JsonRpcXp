@@ -1,0 +1,314 @@
+<?php
+
+/**
+ * JsonRpcXp
+ *
+ * Copyright (c) 2013-2014, Alexander Wühr <lx@boolshit.de>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in
+ * the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * * Neither the name of Alexander Wühr nor the names of his
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @package Lx\JsonRpcXp
+ * @author Alexander Wühr <lx@boolshit.de>
+ * @copyright 2014 Alexander Wühr <lx@boolshit.de>
+ * @license http://opensource.org/licenses/MIT The MIT License (MIT)
+ * @link https://github.com/l-x/JsonRpcXp
+ */
+
+namespace Lx\JsonRpcXp;
+
+use Lx\Fna\Wrapper as CallbackWrapper;
+
+/**
+ * Class Server
+ *
+ * @package Lx\JsonRpcXp
+ */
+class Server {
+
+	const JSONRPC_VERSION = '2.0';
+
+	/**
+	 * Array of registered server callbacks
+	 *
+	 * @var CallbackWrapper[]
+	 */
+	protected $callbacks = array();
+
+	/**
+	 * Array of registered exceptions
+	 *
+	 * @var \Exception[]
+	 */
+	protected $registered_exceptions = array();
+
+	/**
+	 * Registers an exception
+	 *
+	 * @param string|string[] $exception_class Exception class or array of exception classes to register
+	 * @param int $fault_code Fault code to associate to the exception
+	 *
+	 * @return Server
+	 *
+	 * @todo Add check if $exception_classes contains *really* exception classes
+	 */
+	public function registerException($exception_class) {
+		if (is_array($exception_class)) {
+			foreach ($exception_class as $class) {
+				$this->registerException($class);
+			}
+		} else if (!is_string($exception_class) || !class_exists($exception_class)) {
+			throw new \InvalidArgumentException('Argument must be a valid exception class or array of valid exception classes');
+		} else {
+			$reflection = new \ReflectionClass($exception_class);
+			$this->registered_exceptions[] = $reflection->getName();
+			$this->registered_exceptions = array_unique($this->registered_exceptions);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Determines wether an exception is registered or not
+	 *
+	 * @param \Exception $e
+	 *
+	 * @return bool
+	 */
+	protected function isExceptionRegistered(\Exception $e) {
+		return in_array(get_class($e), $this->registered_exceptions);
+	}
+
+	/**
+	 * Json encoder method
+	 *
+	 * @param mixed $data
+	 *
+	 * @return string
+	 */
+	protected function json_encode($data) {
+		return json_encode($data);
+	}
+
+	/**
+	 * Json decoder method
+	 *
+	 * @param string $json
+	 *
+	 * @return mixed
+	 */
+	protected function json_decode($json) {
+		return json_decode($json);
+	}
+
+	/**
+	 * Returns a json-rpc message stub
+	 *
+	 * @param null|int|string $id
+	 *
+	 * @return array
+	 */
+	protected function getMessageStub($id = null) {
+		return array(
+			'jsonrpc'       => self::JSONRPC_VERSION,
+			'id'            => $id,
+		);
+	}
+
+	/**
+	 * Returns a json-rpc error response
+	 *
+	 * @param Fault $e
+	 * @param null|int|string $id
+	 *
+	 * @return array
+	 */
+	protected function fault(Fault $e, $id = null) {
+		return $this->getMessageStub($id) + array(
+			'error' => $e->toArray()
+		);
+	}
+
+	/**
+	 * Registers object or class methods as server callbacks within the given namespace
+	 *
+	 * @param object|string $object Object instance or class name
+	 * @param string $namespace
+	 *
+	 * @return Server
+	 */
+	public function registerObject($object, $namespace = '') {
+		foreach (get_class_methods($object) as $method_name) {
+			$this->registerFunction($method_name, array($object, $method_name), $namespace);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Wraps the callback for proper argument handling
+	 * @see https://github.com/l-x/Fna
+	 *
+	 * @param callable $callback
+	 *
+	 * @return \Lx\Fna\Wrapper
+	 */
+	protected function wrapCallback($callback) {
+		return new CallbackWrapper($callback);
+	}
+
+	/**
+	 * Registers a callback as server callback within the given namespace
+	 *
+	 * @param string $name
+	 * @param callable $callback
+	 * @param string $namespace
+	 *
+	 * @return Server
+	 */
+	public function registerFunction($name, $callback, $namespace = '') {
+		$this->callbacks["$namespace.$name"] = $this->wrapCallback($callback);
+
+		return $this;
+	}
+
+	/**
+	 * Validates a json-rpc request message, returns a fault array on error or true on success
+	 *
+	 * @param \stdClass $message
+	 *
+	 * @return array|bool
+	 */
+	protected function validateMessage(\stdClass $message) {
+
+		if (!isset($message->id)) {
+			$message->id = null;
+		}
+
+		if (!isset($message->jsonrpc) || $message->jsonrpc !== self::JSONRPC_VERSION) {
+			return $this->fault(new Fault\InvalidRequest('Wrong or missing json-rpc version string '), $message->id);
+		}
+
+		if (!isset($message->method)) {
+			return $this->fault(new Fault\InvalidRequest('Missing method name'), $message->id);
+		}
+
+		if (!isset($this->callbacks[$message->method])) {
+			return $this->fault(new Fault\MethodNotFound(strval($message->method)), $message->id);
+		}
+
+		if (!isset($message->params)) {
+			$message->params = array();
+		}
+
+		if (!is_array($message->params) && !is_object($message->params)) {
+			return $this->fault(new Fault\InvalidParams(), $message->id);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Executes a single request message and returns the result or a fault message
+	 *
+	 * @param \stdClass $message
+	 *
+	 * @return array
+	 */
+	protected function handleMessage(\stdClass $message) {
+
+		$validation_result = $this->validateMessage($message);
+
+		if ($validation_result !== true) {
+			return $validation_result;
+		}
+
+		$callback = $this->callbacks[$message->method];
+
+		try {
+			$result = $callback($message->params);
+		} catch (\Exception $e) {
+			if ($this->isExceptionRegistered($e)) {
+				$fault = Fault::hydrate($e);
+			} else {
+				$fault = new Fault\InternalError();
+			}
+
+			return $this->fault($fault, $message->id);
+		}
+
+		if (!is_null($message->id)) {
+			return $this->getMessageStub($message->id) + array(
+				'result'        => $result,
+			);
+		}
+	}
+
+	/**
+	 * Returns the raw json-rpc request string from the given uri
+	 *
+	 * @param $uri
+	 *
+	 * @return string
+	 */
+	protected function getRawContents($uri) {
+		return file_get_contents($uri);
+	}
+
+	/**
+	 * Handles the raw json request (batch or single) and returns the json-encoded response
+	 *
+	 * @param string|null $request Optional json request object or array
+	 *
+	 * @return string Json encoded response
+	 */
+	public function handle($request = null) {
+
+		if (!$request) {
+			$request = $this->getRawContents('php://input');
+		}
+
+		if (!$data = $this->json_decode($request)) {
+			return $this->fault(new Fault\ParseError());
+		}
+
+		if (is_array($data)) {
+			$result = array();
+			foreach ($data as $message) {
+				$result[] = $this->handleMessage($message);
+			}
+		} else {
+			$result = $this->handleMessage($data);
+		}
+
+		return $this->json_encode($result);
+	}
+}
+

@@ -1,6 +1,6 @@
 /.idea/
 /atlassian-ide-plugin.xml
 /dev/
-/build/
 /vendor/
 /composer.lock
+/build/

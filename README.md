@@ -1,7 +1,3 @@
-**WARNING! This library is still under development and far away from a usable state.**
-
-----
-
 # JsonRpcXp
 
 ## A json-rpc 2.0 client and server library
@@ -11,6 +7,9 @@
 * Transport independent design
 * Support for magic dot notation in method names
 * Support for batch calls
+
+### Future features:
+
 * Support for [json class hinting][]
 * Support for [json-rpc extensions][] via plugins
 
@@ -21,7 +20,3 @@
 
 [json class hinting]: http://json-rpc.org/wiki/specification#a3.JSONClasshinting
 [json-rpc extensions]: http://www.jsonrpc.org/specification#extensions
-
-----
-
-**WARNING! This library is still under development and far away from a usable state.**
