@@ -59,7 +59,7 @@ class InvalidRequest extends NamedFault {
 	 *
 	 * @return int
 	 */
-	public static function getFaultCode() {
+	public function getFaultCode() {
 		return -32600;
 	}
 
@@ -68,7 +68,7 @@ class InvalidRequest extends NamedFault {
 	 *
 	 * @return string
 	 */
-	public static function getFaultMessage() {
+	public function getFaultMessage() {
 		return 'Invalid request';
 	}
 } 

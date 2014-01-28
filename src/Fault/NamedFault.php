@@ -59,7 +59,7 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 *
 	 * @return int
 	 */
-	abstract public static function getFaultCode();
+	abstract public function getFaultCode();
 
 
 	/**
@@ -67,7 +67,7 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 *
 	 * @return string
 	 */
-	abstract public static function getFaultMessage();
+	abstract public function getFaultMessage();
 
 	/**
 	 * Constructor for named faults
@@ -75,11 +75,11 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 * @param string $message
 	 */
 	public function __construct($message = '') {
-		$fault_message = static::getFaultMessage();
+		$fault_message = $this->getFaultMessage();
 		if ($message) {
 			$fault_message .= ': '.$message;
 		}
-		parent::__construct($fault_message, static::getFaultCode());
+		parent::__construct($fault_message, $this->getFaultCode());
 	}
 
 	/**
@@ -89,7 +89,7 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 */
 	public function toArray() {
 		return array(
-			'code'          => static::getFaultCode(),
+			'code'          => $this->getFaultCode(),
 			'message'       => $this->getMessage(),
 		);
 	}
