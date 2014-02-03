@@ -31,10 +31,11 @@ $server->registerObject(new WhatIRecommendToUse()); // methods are accessible vi
 $server->registerObject(new WhatIRecommendToUse(), 'eek'); // methods are accessible via `{"method":"eek.<public_object_method>",...}
 
 /* Registering classes */
-/* When registering classes all method calls will be of static nature. Thus any ocourence of the variable `$this` will result in an error */
+/* When registering classes all method calls will be of static nature. Thus any occourence of the variable `$this` will result in an error */
 $server->registerObject('\WhatIRecommendToUse'); // methods are accessible via `{"method":"<public_object_method>",...}
 $server->registerObject('\WhatIRecommendToUse', 'ouch'); // methods are accessible via `{"method":"ouch.<public_object_method>",...}
 
 echo $server->handle(
             file_get_contents('php://input')
 );
+
