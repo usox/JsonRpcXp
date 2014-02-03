@@ -35,4 +35,6 @@ $server->registerObject(new WhatIRecommendToUse(), 'eek'); // methods are access
 $server->registerObject('\WhatIRecommendToUse'); // methods are accessible via `{"method":"<public_object_method>",...}
 $server->registerObject('\WhatIRecommendToUse', 'ouch'); // methods are accessible via `{"method":"ouch.<public_object_method>",...}
 
-echo $server->handle();
+echo $server->handle(
+            file_get_contents('php://input')
+);

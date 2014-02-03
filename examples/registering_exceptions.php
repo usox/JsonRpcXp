@@ -29,4 +29,6 @@ $server->registerException(
        )
 ); // this should be self-explanatory - registering multiple exception classes at once...
 
-echo $server->handle();
+echo $server->handle(
+            file_get_contents('php://input')
+);

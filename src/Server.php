@@ -272,29 +272,13 @@ class Server {
 	}
 
 	/**
-	 * Returns the raw json-rpc request string from the given uri
-	 *
-	 * @param $uri
-	 *
-	 * @return string
-	 */
-	protected function getRawContents($uri) {
-		return file_get_contents($uri);
-	}
-
-	/**
 	 * Handles the raw json request (batch or single) and returns the json-encoded response
 	 *
 	 * @param string|null $request Optional json request object or array
 	 *
 	 * @return string Json encoded response
 	 */
-	public function handle($request = null) {
-
-		if (!$request) {
-			$request = $this->getRawContents('php://input');
-		}
-
+	public function handle($request) {
 		if (!$data = $this->json_decode($request)) {
 			return $this->json_encode(
 			            $this->fault(new Fault\ParseError())

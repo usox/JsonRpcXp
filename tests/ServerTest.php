@@ -46,6 +46,11 @@ namespace Lx\JsonRpcXp;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+/**
+ * Class TestObject
+ *
+ * @package Lx\JsonRpcXp
+ */
 class TestObject {
 	public function foo() {
 
@@ -64,6 +69,13 @@ class TestObject {
 	}
 }
 
+/**
+ * Class ServerProxy
+ *
+ * Proxy object for access to protected methods and members
+ *
+ * @package Lx\JsonRpcXp
+ */
 class ServerProxy extends Server {
 	public function get($key) {
 		return $this->$key;
@@ -78,6 +90,11 @@ class ServerProxy extends Server {
 	}
 }
 
+/**
+ * Class ServerTest
+ *
+ * @package Lx\JsonRpcXp
+ */
 class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
@@ -85,8 +102,14 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	protected $obj;
 
+	/**
+	 * @var \stdClass
+	 */
 	protected $message;
 
+	/**
+	 * Testcase setup
+	 */
 	public function setUp() {
 
 		$this->obj = new ServerProxy();
@@ -263,6 +286,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() return true on valid message
 	 */
 	public function validateMessageReturnsTrueOnSuccess() {
 		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('fault'));
@@ -286,6 +310,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() returns InvalidRequest fault on missing or wrong version string
 	 */
 	public function validateMessageReturnsFaultOnMissingOrWrongVersion() {
 		$message = clone $this->message;
@@ -298,6 +323,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() returns InvalidRequest fault on missing method parameter
 	 */
 	public function validateMessageReturnsFaultOnMissingMethodName() {
 		$message = clone $this->message;
@@ -307,6 +333,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() returns MethodNotFound fault on unknown method
 	 */
 	public function validateMessageReturnsFaultOnUnknownMethod() {
 		$message = clone $this->message;
@@ -316,6 +343,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() returns InvalidParams fault on invalid parameter type
 	 */
 	public function validateMessageReturnsFaultOnInvalidParams() {
 		$message = clone $this->message;
@@ -325,6 +353,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() sets message's id to null when missing
 	 */
 	public function validateMessageSetsIdWhenMissing() {
 		$message = clone $this->message;
@@ -337,6 +366,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::validateMessage() sets message's params to array() when missing
 	 */
 	public function validateMessageSetsParamsWhenMissing() {
 		$message = clone $this->message;
