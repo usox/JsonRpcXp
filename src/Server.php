@@ -254,6 +254,8 @@ class Server {
 
 		try {
 			$result = $callback($message->params);
+		} catch (Fault $e) {
+			return $this->fault($e, $message->id);
 		} catch (\Exception $e) {
 			if ($this->isExceptionRegistered($e)) {
 				$fault = Fault::hydrate($e);

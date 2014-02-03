@@ -52,6 +52,38 @@ namespace Lx\JsonRpcXp;
 class Fault extends \Exception {
 
 	/**
+	 * @var mixed
+	 */
+	protected $data = null;
+
+	public function __construct($message = '', $code = 0, $data = null) {
+		parent::__construct($message, $code);
+		$this->setData($data);
+	}
+
+	/**
+	 * Sets the error object's data attribute
+	 *
+	 * @param mixed $data
+	 *
+	 * @return $this
+	 */
+	public function setData($data = null) {
+		$this->data = $data;
+
+		return $this;
+	}
+
+	/**
+	 * Returns the error object's data attribute
+	 *
+	 * @return mixed
+	 */
+	public function getData() {
+		return $this->data;
+	}
+
+	/**
 	 * Hydrates an instance of Fault (or child class) with the exceptions's data
 	 *
 	 * @param \Exception $e
@@ -69,9 +101,15 @@ class Fault extends \Exception {
 	 * @return array
 	 */
 	public function toArray() {
-		return array(
+		$data = array(
 			'code'          => $this->getCode(),
 			'message'       => $this->getMessage(),
 		);
+
+		if (!is_null($this->getData())) {
+			$data['data'] = $this->getData();
+		}
+
+		return $data;
 	}
 } 
