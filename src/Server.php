@@ -194,7 +194,10 @@ class Server {
 	 * @return Server
 	 */
 	public function registerFunction($name, $callback, $namespace = '') {
-		$this->callbacks["$namespace.$name"] = $this->wrapCallback($callback);
+		if ($namespace) {
+			$name = "$namespace.$name";
+		}
+		$this->callbacks[$name] = $this->wrapCallback($callback);
 
 		return $this;
 	}
