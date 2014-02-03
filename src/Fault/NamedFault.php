@@ -88,9 +88,9 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 * @return array
 	 */
 	public function toArray() {
-		return array(
-			'code'          => $this->getFaultCode(),
-			'message'       => $this->getMessage(),
-		);
+		$data = parent::toArray();
+		$data['code'] = $this->getFaultCode();
+
+		return $data;
 	}
 }
