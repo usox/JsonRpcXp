@@ -74,12 +74,12 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 *
 	 * @param string $message
 	 */
-	public function __construct($message = '') {
+	public function __construct($message = '', $data = null) {
 		$fault_message = $this->getFaultMessage();
 		if ($message) {
 			$fault_message .= ': '.$message;
 		}
-		parent::__construct($fault_message, $this->getFaultCode());
+		parent::__construct($fault_message, $this->getFaultCode(), $data);
 	}
 
 	/**
