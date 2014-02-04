@@ -36,39 +36,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package Lx\JsonRpcXp
- * @subpackage Fault
  * @author Alexander Wühr <lx@boolshit.de>
  * @copyright 2014 Alexander Wühr <lx@boolshit.de>
  * @license http://opensource.org/licenses/MIT The MIT License (MIT)
  * @link https://github.com/l-x/JsonRpcXp
  */
 
-namespace Lx\JsonRpcXp\Fault;
+namespace Lx\JsonRpcXp;
 
-/**
- * Class InvalidParams
- *
- * @package Lx\JsonRpcXp\Fault
- */
-class InvalidParams extends NamedFault {
+require_once __DIR__.'/../vendor/autoload.php';
+
+class BaseProxy extends Base {
+
+	public function _get($key) {
+		return $this->$key;
+	}
+
+	public function _set($key, $value) {
+		$this->$key = $value;
+
+		return $this;
+	}
+
+	public function _call($method, $arguments = array()) {
+		return call_user_func_array(array($this, $method), $arguments);
+	}
+}
+
+
+class BaseTest extends \PHPUnit_Framework_TestCase {
 
 	/**
-	 * Returns the json-rpc faultcode for the exception
-	 *
-	 * @see http://www.jsonrpc.org/specification#error_object
-	 *
-	 * @return int
+	 * @var BaseProxy
 	 */
-	public function getFaultCode() {
-		return self::INVALID_PARAMS;
+	protected $obj;
+
+	public function setUp() {
+		$this->obj = new BaseProxy();
+	}
+
+	public function stubIdProvider() {
+		return array(
+			array(123, array('jsonrpc' => '2.0', 'id' => 123)),
+			array(null, array('jsonrpc' => '2.0', 'id' => null)),
+			array(false, array('jsonrpc' => '2.0')),
+		);
 	}
 
 	/**
-	 * Returns the json-rpc fault message for the exception
-	 *
-	 * @return string
+	 * @test
+	 * @testdox Base::getMessageStub() returns proper structure
+	 * @dataProvider stubIdProvider
 	 */
-	public function getFaultMessage() {
-		return 'Invalid params';
+	public function getMessageStub($id, $stub) {
+		$this->assertEquals($stub, $this->obj->_call('getMessageStub', array($id)));
 	}
-} 
+}

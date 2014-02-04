@@ -51,9 +51,7 @@ use Lx\Fna\Wrapper as CallbackWrapper;
  *
  * @package Lx\JsonRpcXp
  */
-class Server {
-
-	const JSONRPC_VERSION = '2.0';
+class Server extends Base {
 
 	/**
 	 * Array of registered server callbacks
@@ -104,42 +102,6 @@ class Server {
 	 */
 	protected function isExceptionRegistered(\Exception $e) {
 		return in_array(get_class($e), $this->registered_exceptions);
-	}
-
-	/**
-	 * Json encoder method
-	 *
-	 * @param mixed $data
-	 *
-	 * @return string
-	 */
-	protected function json_encode($data) {
-		return json_encode($data);
-	}
-
-	/**
-	 * Json decoder method
-	 *
-	 * @param string $json
-	 *
-	 * @return mixed
-	 */
-	protected function json_decode($json) {
-		return json_decode($json);
-	}
-
-	/**
-	 * Returns a json-rpc message stub
-	 *
-	 * @param null|int|string $id
-	 *
-	 * @return array
-	 */
-	protected function getMessageStub($id = null) {
-		return array(
-			'jsonrpc'       => self::JSONRPC_VERSION,
-			'id'            => $id,
-		);
 	}
 
 	/**
@@ -284,8 +246,8 @@ class Server {
 	 * @return string Json encoded response
 	 */
 	public function handle($request) {
-		if (!$data = $this->json_decode($request)) {
-			return $this->json_encode(
+		if (!$data = $this->jsonDecode($request)) {
+			return $this->jsonEncode(
 			            $this->fault(new Fault\ParseError())
 			);
 		}
@@ -299,7 +261,7 @@ class Server {
 			$result = $this->handleMessage($data);
 		}
 
-		return $this->json_encode($result);
+		return $this->jsonEncode($result);
 	}
 }
 

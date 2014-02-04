@@ -51,6 +51,16 @@ namespace Lx\JsonRpcXp;
  */
 class Fault extends \Exception {
 
+	const INTERNAL_ERROR = -32603;
+
+	const INVALID_PARAMS = -32602;
+
+	const INVALID_REQUEST = -32600;
+
+	const METHOD_NOT_FOUND = -32601;
+
+	const PARSE_ERROR = -32700;
+
 	/**
 	 * @var mixed
 	 */

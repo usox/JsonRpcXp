@@ -60,7 +60,7 @@ class MethodNotFound extends NamedFault {
 	 * @return int
 	 */
 	public function getFaultCode() {
-		return -32601;
+		return self::METHOD_NOT_FOUND;
 	}
 
 	/**

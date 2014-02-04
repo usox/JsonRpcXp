@@ -202,20 +202,6 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
-	 * @testdox Server::getMessageStub() returns proper structure
-	 */
-	public function getMessageStub() {
-		$id = 'test';
-		$expected = array(
-			'id'            => $id,
-			'jsonrpc'       => '2.0',
-		);
-
-		$this->assertEquals($expected, $this->obj->call('getMessageStub', array($id)));
-	}
-
-	/**
-	 * @test
 	 * @testdox Server::fault() returns proper structure
 	 */
 	public function fault() {

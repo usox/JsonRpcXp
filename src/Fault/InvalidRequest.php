@@ -60,7 +60,7 @@ class InvalidRequest extends NamedFault {
 	 * @return int
 	 */
 	public function getFaultCode() {
-		return -32600;
+		return self::INVALID_REQUEST;
 	}
 
 	/**

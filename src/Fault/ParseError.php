@@ -60,7 +60,7 @@ class ParseError extends NamedFault {
 	 * @return int
 	 */
 	public function getFaultCode() {
-		return -32700;
+		return self::PARSE_ERROR;
 	}
 
 	/**

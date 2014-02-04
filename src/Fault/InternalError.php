@@ -60,7 +60,7 @@ class InternalError extends NamedFault {
 	 * @return int
 	 */
 	public function getFaultCode() {
-		return -32603;
+		return self::INTERNAL_ERROR;
 	}
 
 	/**

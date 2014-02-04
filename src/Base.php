@@ -36,39 +36,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package Lx\JsonRpcXp
- * @subpackage Fault
  * @author Alexander Wühr <lx@boolshit.de>
  * @copyright 2014 Alexander Wühr <lx@boolshit.de>
  * @license http://opensource.org/licenses/MIT The MIT License (MIT)
  * @link https://github.com/l-x/JsonRpcXp
  */
 
-namespace Lx\JsonRpcXp\Fault;
+namespace Lx\JsonRpcXp;
 
-/**
- * Class InvalidParams
- *
- * @package Lx\JsonRpcXp\Fault
- */
-class InvalidParams extends NamedFault {
+abstract class Base {
+
+	const JSONRPC_VERSION = '2.0';
 
 	/**
-	 * Returns the json-rpc faultcode for the exception
+	 * Json encoder
 	 *
-	 * @see http://www.jsonrpc.org/specification#error_object
+	 * @param mixed $data Data to encode
 	 *
-	 * @return int
+	 * @return string Json string
 	 */
-	public function getFaultCode() {
-		return self::INVALID_PARAMS;
+	protected function jsonEncode($data) {
+		return @json_encode($data);
 	}
 
 	/**
-	 * Returns the json-rpc fault message for the exception
+	 * Json decoder
 	 *
-	 * @return string
+	 * @param string $json Json string
+	 *
+	 * @return mixed Decoded data
 	 */
-	public function getFaultMessage() {
-		return 'Invalid params';
+	protected function jsonDecode($json) {
+		return @json_decode($json);
+	}
+
+	/**
+	 * Returns a json-rpc message stub
+	 *
+	 * @param null|bool|int|string $id The message's id. If set to `false` (default) the id attribute will be omitted
+	 *
+	 * @return array
+	 */
+	protected function getMessageStub($id = false) {
+		$stub = array('jsonrpc' => self::JSONRPC_VERSION);
+		if ($id !== false) {
+			$stub['id'] = $id;
+		}
+
+		return $stub;
 	}
 } 
