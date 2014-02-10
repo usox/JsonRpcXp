@@ -127,6 +127,7 @@ class Server extends Base {
 	 * @return Server
 	 */
 	public function registerObject($object, $namespace = '') {
+
 		foreach (get_class_methods($object) as $method_name) {
 			$this->registerFunction($method_name, array($object, $method_name), $namespace);
 		}
@@ -172,7 +173,6 @@ class Server extends Base {
 	 * @return array|bool
 	 */
 	protected function validateMessage(\stdClass $message) {
-
 		if (!isset($message->id)) {
 			$message->id = null;
 		}
@@ -201,6 +201,37 @@ class Server extends Base {
 	}
 
 	/**
+	 * Handles an exception thrown by callback
+	 *
+	 * @param \Exception $e
+	 */
+	protected function handleCallbackException(\Exception $e, $message_id) {
+		if ($e instanceof \Lx\JsonRpcXp\Fault) {
+			$exception = $e;
+		} else if ($this->isExceptionRegistered($e)) {
+			$exception = Fault::hydrate($e);
+		} else {
+			$exception = new Fault\InternalError();
+		}
+
+		return $this->fault($exception, $message_id);
+	}
+
+	/**
+	 * Handles the callback's response
+	 *
+	 * @param mixed $response
+	 * @param null|int|string $message_id
+	 *
+	 * @return array
+	 */
+	protected function handleCallbackResponse($response, $message_id) {
+		return $this->getMessageStub($message_id) + array(
+			'result'        => $response,
+		);
+	}
+
+	/**
 	 * Executes a single request message and returns the result or a fault message
 	 *
 	 * @param \stdClass $message
@@ -208,7 +239,6 @@ class Server extends Base {
 	 * @return array
 	 */
 	protected function handleMessage(\stdClass $message) {
-
 		$validation_result = $this->validateMessage($message);
 
 		if ($validation_result !== true) {
@@ -218,24 +248,16 @@ class Server extends Base {
 		$callback = $this->callbacks[$message->method];
 
 		try {
-			$result = $callback($message->params);
-		} catch (Fault $e) {
-			return $this->fault($e, $message->id);
+			$response = $this->handleCallbackResponse($callback($message->params), $message->id);
 		} catch (\Exception $e) {
-			if ($this->isExceptionRegistered($e)) {
-				$fault = Fault::hydrate($e);
-			} else {
-				$fault = new Fault\InternalError();
-			}
-
-			return $this->fault($fault, $message->id);
+			$response = $this->handleCallbackException($e, $message->id);
 		}
 
 		if (!is_null($message->id)) {
-			return $this->getMessageStub($message->id) + array(
-				'result'        => $result,
-			);
+			return $response;
 		}
+
+		return null;
 	}
 
 	/**
@@ -255,13 +277,19 @@ class Server extends Base {
 		if (is_array($data)) {
 			$result = array();
 			foreach ($data as $message) {
-				$result[] = $this->handleMessage($message);
+				if ($response = $this->handleMessage($message)) {
+					$result[] = $response;
+				}
 			}
 		} else {
 			$result = $this->handleMessage($data);
 		}
 
-		return $this->jsonEncode($result);
+		if ($result) {
+			return $this->jsonEncode($result);
+		}
+
+		return null;
 	}
 }
 

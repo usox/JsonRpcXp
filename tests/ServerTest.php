@@ -35,11 +35,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package Lx\JsonRpcXp
- * @author Alexander Wühr <lx@boolshit.de>
+ * @package   Lx\JsonRpcXp
+ * @author    Alexander Wühr <lx@boolshit.de>
  * @copyright 2014 Alexander Wühr <lx@boolshit.de>
- * @license http://opensource.org/licenses/MIT The MIT License (MIT)
- * @link https://github.com/l-x/JsonRpcXp
+ * @license   http://opensource.org/licenses/MIT The MIT License (MIT)
+ * @link      https://github.com/l-x/JsonRpcXp
  */
 
 namespace Lx\JsonRpcXp;
@@ -52,6 +52,7 @@ require_once __DIR__.'/../vendor/autoload.php';
  * @package Lx\JsonRpcXp
  */
 class TestObject {
+
 	public function foo() {
 
 	}
@@ -61,10 +62,6 @@ class TestObject {
 	}
 
 	protected function baz() {
-
-	}
-
-	private function snafu() {
 
 	}
 }
@@ -77,6 +74,7 @@ class TestObject {
  * @package Lx\JsonRpcXp
  */
 class ServerProxy extends Server {
+
 	public function get($key) {
 		return $this->$key;
 	}
@@ -114,14 +112,16 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 		$this->obj = new ServerProxy();
 		$this->message = (object) array(
-			'id'            => 'id',
-			'jsonrpc'       => '2.0',
-			'method'        => 'foo',
-			'params'        => array('bar'),
+			'id' => 'id',
+			'jsonrpc' => '2.0',
+			'method' => 'foo',
+			'params' => array('bar'),
 		);
-		$this->obj->set('callbacks', array(
-		                             $this->message->method => true
-		                        )
+		$this->obj->set(
+			'callbacks',
+			array(
+				$this->message->method => true
+			)
 		);
 	}
 
@@ -134,16 +134,19 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 	public function getFaultMock() {
 		$mock = $this->getMock(__NAMESPACE__.'\ServerProxy', array('fault'));
 		$mock->expects($this->once())->method('fault')->will(($this->returnArgument(0)));
-		$mock->set('callbacks', array(
-		                            $this->message->method => true
-		                       )
+		$mock->set(
+			'callbacks',
+			array(
+				$this->message->method => true
+			)
 		);
+
 		return $mock;
 	}
 
 	/**
 	 * @test
-	 * @testdox Server::registerException() throws an exception on non existing exception class
+	 * @testdox                  Server::registerException() throws an exception on non existing exception class
 	 *
 	 * @expectedException \InvalidArgumentException
 	 * @expectedExceptionMessage Argument must be a valid exception class or array of valid exception classes
@@ -161,7 +164,12 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('Exception'), $this->obj->get('registered_exceptions'));
 
 		$this->obj->registerException('InvalidArgumentException');
-		$this->assertEquals(array('Exception', 'InvalidArgumentException'), $this->obj->get('registered_exceptions'));
+		$this->assertEquals(
+			array(
+				'Exception', 'InvalidArgumentException'
+			),
+			$this->obj->get('registered_exceptions')
+		);
 	}
 
 	/**
@@ -208,23 +216,15 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$id = 'test';
 
 		$fault = $this->getMock(__NAMESPACE__.'\Fault', array('toArray'));
-		$fault
-			->expects($this->once())
-			->method('toArray')
-			->will($this->returnValue(array('fault')))
-		;
+		$fault->expects($this->once())->method('toArray')->will($this->returnValue(array('fault')));
 
 		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('getMessageStub'));
-		$obj
-			->expects($this->once())
-			->method('getMessageStub')
-			->with($id)
-			->will($this->returnValue(array('stub')))
-		;
+		$obj->expects($this->once())->method('getMessageStub')->with($id)->will(
+				$this->returnValue(array('stub'))
+			);
 
 		$expected = array(
-			'stub',
-			'error' => array('fault'),
+			'stub', 'error' => array('fault'),
 		);
 
 		$this->assertEquals($expected, $obj->call('fault', array($fault, $id)));
@@ -240,10 +240,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$methods = get_class_methods($object);
 
 		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('registerFunction'));
-		$obj->expects($this->exactly(count($methods)))
-			->method('registerFunction')
-			->will($this->returnSelf())
-		;
+		$obj->expects($this->exactly(count($methods)))->method('registerFunction')->will($this->returnSelf());
 
 		$obj->registerObject($object, $namespace);
 	}
@@ -260,11 +257,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$expected = array("$namespace.$name" => $callback);
 
 		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('wrapCallback'));
-		$obj->expects($this->once())
-			->method('wrapCallback')
-			->with($callback)
-			->will($this->returnArgument(0))
-		;
+		$obj->expects($this->once())->method('wrapCallback')->with($callback)->will($this->returnArgument(0));
 
 		$obj->registerFunction($name, $callback, $namespace);
 		$this->assertEquals($expected, $obj->get('callbacks'));
@@ -276,13 +269,14 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function validateMessageReturnsTrueOnSuccess() {
 		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('fault'));
-		$obj->set('callbacks', array(
-		                            $this->message->method => true
-		                       )
+		$obj->set(
+			'callbacks',
+			array(
+				$this->message->method => true
+			)
 		);
 
-		$obj->expects($this->never())
-			->method('fault');
+		$obj->expects($this->never())->method('fault');
 
 		$this->assertTrue($obj->call('validateMessage', array($this->message)));
 	}
@@ -361,5 +355,284 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$this->obj->call('validateMessage', array($message));
 
 		$this->assertEquals(array(), $message->params);
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::wrapCallback() returns instance of \Lx\Fna\Wrapper
+	 */
+	public function wrapCallback() {
+		$this->assertInstanceOf(
+			'\Lx\Fna\Wrapper',
+			$this->obj->call(
+				'wrapCallback',
+				array(
+					function () {
+					},
+				)
+			)
+		);
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handleCallbackResponse() returns proper value
+	 */
+	public function handleCallbackResponse() {
+		$message_id = 'foo';
+
+		$result = 'bar';
+		$expected = array(
+			'result' => $result,
+		);
+
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('getMessageStub'));
+		$sut->expects($this->once())->method('getMessageStub')->with($message_id)->will(
+				$this->returnValue(array())
+			);
+
+		$this->assertEquals($expected, $sut->call('handleCallbackResponse', array($result, $message_id)));
+	}
+
+	public function getHandleCallbackExceptionMock($message_id, $exception_class) {
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('isExceptionRegistered', 'fault'));
+		$sut->expects($this->once())->method('fault')->with($this->isInstanceOf($exception_class), $message_id)
+			->will($this->returnValue(true));
+
+		return $sut;
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handleCallbackException() returns proper value on thrown \Lx\JsonRpcXp\Fault
+	 */
+	public function handleCallbackExceptionOnFault() {
+		$message_id = 'foo';
+		$exception_class = __NAMESPACE__.'\Fault';
+		$sut = $this->getHandleCallbackExceptionMock($message_id, $exception_class);
+		$sut->expects($this->never())->method('isExceptionRegistered');
+
+		$this->assertTrue($sut->call('handleCallbackException', array(new $exception_class(), $message_id)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handleCallbackException() returns proper value on thrown registered exception
+	 */
+	public function handleCallbackExceptionOnRegisteredException() {
+		$message_id = 'foo';
+		$exception_class = '\Exception';
+		$sut = $this->getHandleCallbackExceptionMock($message_id, __NAMESPACE__.'\Fault');
+		$sut->expects($this->once())->method('isExceptionRegistered')->will($this->returnValue(true));
+
+		$this->assertTrue($sut->call('handleCallbackException', array(new $exception_class(), $message_id)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handleCallbackException() returns proper value on thrown unregistered exception
+	 */
+	public function handleCallbackExceptionOnUnregisteredException() {
+		$message_id = 'foo';
+		$exception_class = '\Exception';
+		$sut = $this->getHandleCallbackExceptionMock($message_id, __NAMESPACE__.'\Fault\InternalError');
+		$sut->expects($this->once())->method('isExceptionRegistered')->will($this->returnValue(false));
+
+		$this->assertTrue($sut->call('handleCallbackException', array(new $exception_class(), $message_id)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handleMessage() returns result of Server::validateMessage() on validation error
+	 */
+	public function handleMessageReturnsValidationResultOnError() {
+		$message = new \stdClass();
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('validateMessage'));
+
+		$sut->expects($this->once())->method('validateMessage')->with($message)->will(
+				$this->returnValue('something')
+			);
+
+		$this->assertEquals('something', $sut->call('handleMessage', array($message)));
+	}
+
+
+	public function handleMessageProvider() {
+		return array(
+			array('test_id', 'test_response'), array(null, null),
+		);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider handleMessageProvider
+	 * @testdox Server::handleMessage() returns proper result on message
+	 */
+	public function handleMessageReturnsResultOnMessage($message_id, $expected) {
+		$message = (object) array(
+			'id' => $message_id, 'method' => 'test_method', 'params' => array(),
+		);
+
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('validateMessage', 'handleCallbackResponse'));
+
+		$sut->expects($this->once())->method('validateMessage')->with($message)->will($this->returnValue(true));
+
+		$sut->expects($this->once())->method('handleCallbackResponse')->with($expected, $message->id)->will(
+				$this->returnValue($expected)
+			);
+
+		$sut->set(
+			'callbacks',
+			array(
+				$message->method => function () use ($expected) {
+						return $expected;
+					}
+			)
+		);
+
+		$this->assertEquals($expected, $sut->call('handleMessage', array($message)));
+	}
+
+	/**
+	 * @test
+	 * @dataProvider handleMessageProvider
+	 * @testdox Server::handleMessage() returns proper result on fault/exception
+	 */
+	public function handleMessageReturnsResultOnFault($message_id, $expected) {
+		$message = (object) array(
+			'id' => $message_id, 'method' => 'test_method', 'params' => array(),
+		);
+
+		$test_response = 'response';
+
+		$sut = $this->getMock(
+			__NAMESPACE__.'\ServerProxy',
+			array(
+				'validateMessage', 'handleCallbackResponse', 'handleCallbackException'
+			)
+		);
+
+		$sut->expects($this->once())->method('validateMessage')->with($message)->will($this->returnValue(true));
+
+		$sut->expects($this->never())->method('handleCallbackResponse');
+
+		$sut->expects($this->once())->method('handleCallbackException')->with(
+				$this->isInstanceOf('\Exception'),
+				$message->id
+			)->will($this->returnValue($expected));
+
+		$sut->set(
+			'callbacks',
+			array(
+				$message->method => function () use ($test_response) {
+						throw new \Exception();
+					}
+			)
+		);
+
+		$this->assertEquals($expected, $sut->call('handleMessage', array($message)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handle() returns proper result on json parse error
+	 */
+	public function handleReturnsFaultOnDecodeError() {
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('jsonEncode', 'jsonDecode', 'fault'));
+
+		$request = 'test_request';
+		$json_encode_result = 'encode_result';
+		$fault_result = 'fault_result';
+
+		$sut->expects($this->once())->method('jsonDecode')->with($request)->will($this->returnValue(false));
+
+		$sut->expects($this->once())->method('fault')->with(
+				$this->isInstanceOf(__NAMESPACE__.'\Fault\ParseError')
+			)->will($this->returnValue($fault_result));
+
+		$sut->expects($this->once())->method('jsonEncode')->with($fault_result)->will(
+				$this->returnValue($json_encode_result)
+			);
+
+		$this->assertEquals($json_encode_result, $sut->call('handle', array($request)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handle() returns proper result on single message request
+	 */
+	public function handleReturnsResponseOnSingleRequest() {
+		$request = 'test_request';
+
+		$response = 'test_response';
+
+		$jsondecode_result = (object) array(
+			'some' => 'value',
+		);
+
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('handleMessage', 'jsonEncode', 'jsonDecode'));
+
+		$sut->expects($this->once())->method('jsonDecode')->with($request)->will(
+				$this->returnValue($jsondecode_result)
+			);
+
+		$sut->expects($this->once())->method('handleMessage')->with($jsondecode_result)->will(
+				$this->returnValue($response)
+			);
+
+		$sut->expects($this->once())->method('jsonEncode')->with($response)->will(
+				$this->returnValue($response)
+			);
+
+		$this->assertEquals($response, $sut->call('handle', array($request)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handle() returns proper result on batch request
+	 */
+	public function handleReturnsResultsOnBatchMessage() {
+		$request = 'test_request';
+
+		$jsondecode_result = array();
+		foreach (array('some', 'test', 'values') as $item) {
+			$jsondecode_result[] = (object) array(
+				'key' => $item
+			);
+		}
+
+		$response = 'test_response';
+
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('handleMessage', 'jsonEncode', 'jsonDecode'));
+
+		$sut->expects($this->once())->method('jsonDecode')->with($request)->will(
+				$this->returnValue($jsondecode_result)
+			);
+
+		$sut->expects($this->exactly(count($jsondecode_result)))->method('handleMessage')->with(
+				$this->isInstanceOf('\stdClass')
+			)->will($this->returnValue($response));
+
+		$sut->expects($this->once())->method('jsonEncode')->with(
+				array_pad(array(), count($jsondecode_result), $response)
+			)->will($this->returnValue($response));
+
+		$this->assertEquals($response, $sut->call('handle', array($request)));
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::handle() returns null request having no return value (notification)
+	 */
+	public function handleReturnsNullOnNotifications() {
+		$sut = $this->getMock(__NAMESPACE__.'\ServerProxy', array('handleMessage', 'jsonEncode', 'jsonDecode'));
+
+		$sut->expects($this->once())->method('jsonDecode')->will($this->returnValue(new \stdClass()));
+
+		$sut->expects($this->once())->method('handleMessage')->will($this->returnValue(null));
+
+		$sut->expects($this->never())->method('jsonEncode');
+
+		$this->assertNull($sut->call('handle', array('some_dummy_request')));
 	}
 }
