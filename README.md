@@ -10,7 +10,7 @@
 
 ### Future features:
 
-* Support for [json class hinting][]
+* ~~Support for [json class hinting][]~~
 * Support for [json-rpc extensions][] via plugins
 
 ----
