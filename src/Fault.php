@@ -116,8 +116,9 @@ class Fault extends \Exception {
 			'message'       => $this->getMessage(),
 		);
 
-		if (!is_null($this->getData())) {
-			$data['data'] = $this->getData();
+		$additional_data = $this->getData();
+		if (!is_null($additional_data)) {
+			$data['data'] = $additional_data;
 		}
 
 		return $data;
