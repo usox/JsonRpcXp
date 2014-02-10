@@ -15,8 +15,10 @@
 
 ----
 
+[![Latest Stable Version](https://poser.pugx.org/lx/jsonrpcxp/v/stable.png)](https://packagist.org/packages/lx/jsonrpcxp)
+[![Latest Unstable Version](https://poser.pugx.org/lx/jsonrpcxp/v/unstable.png)](https://packagist.org/packages/lx/jsonrpcxp)
 [![Build Status](https://travis-ci.org/l-x/JsonRpcXp.png?branch=master)](https://travis-ci.org/l-x/JsonRpcXp)
-[![Stories in Ready](https://badge.waffle.io/l-x/JsonRpcXp.png?label=ready)](http://waffle.io/l-x/JsonRpcXp)
+[![License](https://poser.pugx.org/lx/jsonrpcxp/license.png)](https://packagist.org/packages/lx/jsonrpcxp)
 
 [json class hinting]: http://json-rpc.org/wiki/specification#a3.JSONClasshinting
 [json-rpc extensions]: http://www.jsonrpc.org/specification#extensions
