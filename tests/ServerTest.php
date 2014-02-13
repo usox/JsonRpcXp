@@ -232,6 +232,15 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @testdox Server::getRemoteProcedureName() returns the correct value
+	 */
+	public function getRemoteProcedureName() {
+		$this->assertEquals('foo', $this->obj->call('getRemoteProcedureName', array('foo', '')));
+		$this->assertEquals('bar.foo', $this->obj->call('getRemoteProcedureName', array('foo', 'bar')));
+	}
+
+	/**
+	 * @test
 	 * @testdox Server::registerObject() properly calls Server::registerFunction() for every object's method
 	 */
 	public function registerObject() {
@@ -253,11 +262,13 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$name = 'bar';
 		$namespace = 'foo';
 		$callback = 'baz';
+		$rp_name = 'rp_name';
 
-		$expected = array("$namespace.$name" => $callback);
+		$expected = array($rp_name => $callback);
 
-		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('wrapCallback'));
+		$obj = $this->getMock(__NAMESPACE__.'\ServerProxy', array('wrapCallback', 'getRemoteProcedureName'));
 		$obj->expects($this->once())->method('wrapCallback')->with($callback)->will($this->returnArgument(0));
+		$obj->expects($this->once())->method('getRemoteProcedureName')->with($name, $namespace)->will($this->returnValue($rp_name));
 
 		$obj->registerFunction($name, $callback, $namespace);
 		$this->assertEquals($expected, $obj->get('callbacks'));
@@ -342,6 +353,21 @@ class ServerTest extends \PHPUnit_Framework_TestCase {
 		$this->obj->call('validateMessage', array($message));
 
 		$this->assertNull($message->id);
+	}
+
+	/**
+	 * @test
+	 * @testdox Server::validateMessage() casts object param to array
+	 */
+	public function validateMessageCastsObjectParamToArray() {
+		$message = clone $this->message;
+		$expected = array('foo' => 'bar', 'herp' => 'derp');
+		$message->params = (object) $expected;
+
+		$this->obj->call('validateMessage', array($message));
+
+		$this->assertEquals($expected, $message->params);
+
 	}
 
 	/**

@@ -136,6 +136,25 @@ class Server extends Base {
 	}
 
 	/**
+	 * Generates the remote procedure name for a method or function
+	 *
+	 * @param $method_name
+	 * @param string $namespace
+	 *
+	 * @return string
+	 */
+	protected function getRemoteProcedureName($method_name, $namespace = '') {
+		if ($namespace) {
+			$name = "$namespace.$method_name";
+		} else {
+			$name = $method_name;
+		}
+
+		return $name;
+	}
+
+
+	/**
 	 * Wraps the callback for proper argument handling
 	 * @see https://github.com/l-x/Fna
 	 *
@@ -157,10 +176,7 @@ class Server extends Base {
 	 * @return Server
 	 */
 	public function registerFunction($name, $callback, $namespace = '') {
-		if ($namespace) {
-			$name = "$namespace.$name";
-		}
-		$this->callbacks[$name] = $this->wrapCallback($callback);
+		$this->callbacks[$this->getRemoteProcedureName($name, $namespace)] = $this->wrapCallback($callback);
 
 		return $this;
 	}
@@ -193,7 +209,11 @@ class Server extends Base {
 			$message->params = array();
 		}
 
-		if (!is_array($message->params) && !is_object($message->params)) {
+		if (is_object($message->params)) {
+			$message->params = (array) $message->params;
+		}
+
+		if (!is_array($message->params)) {
 			return $this->fault(new Fault\InvalidParams(), $message->id);
 		}
 
