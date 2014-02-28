@@ -252,6 +252,20 @@ class Server extends Base {
 	}
 
 	/**
+	 * Invokes the callback
+	 *
+	 * @param callable $callback
+	 * @param array $params
+	 *
+	 * @return mixed
+	 */
+	protected function invokeCallback($callback, $params = array()) {
+		$result = call_user_func($callback, $params);
+
+		return $result;
+	}
+
+	/**
 	 * Executes a single request message and returns the result or a fault message
 	 *
 	 * @param \stdClass $message
@@ -268,7 +282,13 @@ class Server extends Base {
 		$callback = $this->callbacks[$message->method];
 
 		try {
-			$response = $this->handleCallbackResponse($callback($message->params), $message->id);
+			$response = $this->handleCallbackResponse(
+				$this->invokeCallback(
+					$callback,
+					$message->params
+				),
+				$message->id
+			);
 		} catch (\Exception $e) {
 			$response = $this->handleCallbackException($e, $message->id);
 		}
