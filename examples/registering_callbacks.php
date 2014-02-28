@@ -35,6 +35,10 @@ $server->registerObject(new WhatIRecommendToUse(), 'eek'); // methods are access
 $server->registerObject('\WhatIRecommendToUse'); // methods are accessible via `{"method":"<public_object_method>",...}
 $server->registerObject('\WhatIRecommendToUse', 'ouch'); // methods are accessible via `{"method":"ouch.<public_object_method>",...}
 
+/* Registering factories */
+/* The factory function will be called on the first method call for the given namespace, the resulting object will automatically registered */
+$server->registerFactory(function () { return new WhatIRecommendToUse(); }, 'herp');
+
 echo $server->handle(
             file_get_contents('php://input')
 );

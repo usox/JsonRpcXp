@@ -68,6 +68,53 @@ class Server extends Base {
 	protected $registered_exceptions = array();
 
 	/**
+	 * Array of registered factory functions
+	 *
+	 * @var callable[]
+	 */
+	protected $factories = array();
+
+	/**
+	 * Registers a factory function
+	 *
+	 * This function will be called upon the first call to a method in the given $namespace. The factory function
+	 * must return an object instance that can be registered via Server::registerObject()
+	 *
+	 * @param callable $factory
+	 * @param string $namespace
+	 *
+	 * @return Server
+	 */
+	public function registerFactory($factory, $namespace = '') {
+		if (!is_callable($factory)) {
+			throw new \InvalidArgumentException('First argument must be callable');
+		}
+
+		$this->factories[$namespace] = $factory;
+
+		return $this;
+	}
+
+	/**
+	 * Resolves a registered callback an registers the returned object to the server
+	 *
+	 * @param string $namespace
+	 *
+	 * @return Server|bool
+	 */
+	protected function resolveFactory($namespace) {
+		if (!isset($this->factories[$namespace])) {
+			return false;
+		}
+
+		$service = $this->invokeCallback($this->factories[$namespace]);
+		$this->registerObject($service, $namespace);
+		unset($this->factories[$namespace]);
+
+		return $this;
+	}
+
+	/**
 	 * Registers an exception
 	 *
 	 * @param string|string[] $exception_class Exception class or array of exception classes to register
@@ -127,7 +174,6 @@ class Server extends Base {
 	 * @return Server
 	 */
 	public function registerObject($object, $namespace = '') {
-
 		foreach (get_class_methods($object) as $method_name) {
 			$this->registerFunction($method_name, array($object, $method_name), $namespace);
 		}
@@ -151,6 +197,21 @@ class Server extends Base {
 		}
 
 		return $name;
+	}
+
+	/**
+	 * Splits a remote procedure name to the namespace and method name
+	 *
+	 * @param string $remote_procedure_name
+	 *
+	 * @return array
+	 */
+	protected function parseRemoteProcedureName($remote_procedure_name) {
+		$parts = explode('.', $remote_procedure_name);
+		$method_name = array_pop($parts);
+		$namespace = join('.', $parts);
+
+		return array($namespace, $method_name);
 	}
 
 
@@ -201,7 +262,7 @@ class Server extends Base {
 			return $this->fault(new Fault\InvalidRequest('Missing method name'), $message->id);
 		}
 
-		if (!isset($this->callbacks[$message->method])) {
+		if (!$this->getCallback($message->method)) {
 			return $this->fault(new Fault\MethodNotFound(strval($message->method)), $message->id);
 		}
 
@@ -224,6 +285,9 @@ class Server extends Base {
 	 * Handles an exception thrown by callback
 	 *
 	 * @param \Exception $e
+	 * @param int|string|float $message_id
+	 *
+	 * @return void
 	 */
 	protected function handleCallbackException(\Exception $e, $message_id) {
 		if ($e instanceof \Lx\JsonRpcXp\Fault) {
@@ -266,6 +330,28 @@ class Server extends Base {
 	}
 
 	/**
+	 * Returns a callback by the method name, resolves the registered factory if available
+	 *
+	 * @param string $method The fully qualified remote procedure name
+	 *
+	 * @return bool|\Lx\Fna\Wrapper
+	 */
+	protected function getCallback($method) {
+		$callback = false;
+
+		if (!isset($this->callbacks[$method])) {
+			list($namespace, $_) = $this->parseRemoteProcedureName($method);
+			$this->resolveFactory($namespace);
+		}
+
+		if (isset($this->callbacks[$method])) {
+			$callback = $this->callbacks[$method];
+		}
+
+		return $callback;
+	}
+
+	/**
 	 * Executes a single request message and returns the result or a fault message
 	 *
 	 * @param \stdClass $message
@@ -279,7 +365,7 @@ class Server extends Base {
 			return $validation_result;
 		}
 
-		$callback = $this->callbacks[$message->method];
+		$callback = $this->getCallback($message->method);
 
 		try {
 			$response = $this->handleCallbackResponse(
@@ -310,7 +396,7 @@ class Server extends Base {
 	public function handle($request) {
 		if (!$data = $this->jsonDecode($request)) {
 			return $this->jsonEncode(
-			            $this->fault(new Fault\ParseError())
+				$this->fault(new Fault\ParseError())
 			);
 		}
 

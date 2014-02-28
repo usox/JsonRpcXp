@@ -44,6 +44,11 @@
 
 namespace Lx\JsonRpcXp;
 
+/**
+ * Class Base
+ *
+ * @package Lx\JsonRpcXp
+ */
 abstract class Base {
 
 	const JSONRPC_VERSION = '2.0';

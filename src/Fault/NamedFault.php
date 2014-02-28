@@ -73,6 +73,7 @@ abstract class NamedFault extends \Lx\JsonRpcXp\Fault {
 	 * Constructor for named faults
 	 *
 	 * @param string $message
+	 * @param mixed $data
 	 */
 	public function __construct($message = '', $data = null) {
 		$fault_message = $this->getFaultMessage();

@@ -62,10 +62,19 @@ class Fault extends \Exception {
 	const PARSE_ERROR = -32700;
 
 	/**
+	 * Additional data field for json-rpc fault messages
+	 *
 	 * @var mixed
 	 */
 	protected $data = null;
 
+	/**
+	 * Constructor for the json-rpc fault
+	 *
+	 * @param string $message
+	 * @param int $code
+	 * @param mixed $data
+	 */
 	public function __construct($message = '', $code = 0, $data = null) {
 		parent::__construct($message, $code);
 		$this->setData($data);
